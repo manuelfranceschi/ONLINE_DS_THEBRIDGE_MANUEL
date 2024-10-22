@@ -144,3 +144,63 @@ inner join customers as c on e.EmployeeId = c.SupportRepId
 inner join invoices as i on i.CustomerId = c.CustomerId
 where e.title = 'Sales Support Agent'
 GROUP BY nombre_completo_cliente;
+
+-- 4. Obtén cada articulo de la factura con el nombre de la canción 
+select 
+	i.InvoiceId, it.InvoiceLineId, it.TrackId, t.Name
+From invoices as i
+inner join invoice_items as it on it.InvoiceId = i.InvoiceId
+inner join tracks as t on t.TrackId = it.TrackId;
+
+-- 5. Muestra todos los las canciones con su nombre, formato, album y generoalbums
+select 
+	t.Name, m.Name, m.Name, g.Name
+from tracks as t
+inner join albums as a on a.AlbumId = t.AlbumId
+inner join media_types as m on t.MediaTypeId = m.MediaTypeId
+inner join genres as g on t.GenreId = g.GenreId;
+
+-- 6. Cuantas canciones hay en cada playlist
+select 
+	p.playlistid as playlist, count(pt.TrackId)
+from playlists as p
+inner join playlist_track as pt on p.PlaylistId = pt.PlaylistId
+group by 1;
+
+-- 7. Cuanto ha vendido cada empleado 
+select 
+    concat(e.FirstName, ' ', e.LastName) Nombre_completo_agent, sum(i.Total)
+from employees as e
+inner join customers as c on e.EmployeeId = c.SupportRepId
+inner join invoices as i on i.CustomerId = c.CustomerId
+where e.title = 'Sales Support Agent'
+GROUP BY Nombre_completo_agent;
+
+-- 8. Cual es el empleado que más ha vendido en 2009 
+select 
+    concat(e.FirstName, ' ', e.LastName) Nombre_completo_agent, sum(i.Total) as total
+from employees as e
+inner join customers as c on e.EmployeeId = c.SupportRepId
+inner join invoices as i on i.CustomerId = c.CustomerId
+where e.title = 'Sales Support Agent' and strftime('%Y', invoicedate) IN ('2009')
+GROUP BY Nombre_completo_agent
+order by total desc limit 1;
+
+-- 9.¿Cuáles son los 3 grupos que más han vendido?
+-- Posible solución, aunque eliminamos los valores nulos
+SELECT 
+	ar.Name, sum(i.Total) as total
+FROM tracks AS t
+INNER join albums as al ON t.AlbumId = al.AlbumId
+INNER JOIN artists as ar on al.ArtistId = ar.ArtistId
+inner join invoice_items as it on it.TrackId = t.TrackId
+inner join invoices as i on i.InvoiceId = it.InvoiceId
+group by 1
+order by total desc;
+
+-- Los valores nulos de composer pueden cambiarse por el ar.name
+select *
+from tracks as t
+inner join albums as a on a.AlbumId = t.AlbumId
+inner join artists as ar on ar.ArtistId = a.ArtistId
+order by ar.ArtistId;
