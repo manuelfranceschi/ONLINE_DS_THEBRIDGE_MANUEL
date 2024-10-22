@@ -1,0 +1,146 @@
+-- 1. Obten los clientes de brasil
+SELECT 
+	*
+From 
+	customers
+    WHERE country = 'Brazil';
+    
+-- 2. Obten los empleados que son agentes de ventas
+SELECT 
+	*
+From 
+	employees
+    WHERE title = 'Sales Support Agent';
+    
+-- 3. Obten las canciones de AC/DC
+SELECT t.*
+FROM tracks AS t
+INNER join albums as al ON t.AlbumId = al.AlbumId
+INNER JOIN artists as ar on al.ArtistId = ar.ArtistId
+WHERE ar.name = 'AC/DC';
+    
+-- 4. Obtén los campos de los clientes que no sean de USA: nombre completo, id, pais
+SELECT
+	concat(c.FirstName, ' ' ,c.LastName) Nombre_completo,
+    c.customerid as ID, 
+    c.country as Pais
+FROM
+	customers AS c
+    WHERE NOT country = 'USA';
+    
+-- 5. Empleados que son agentes de ventas: nombre completo, direccion y email
+SELECT 
+	concat(e.FirstName, ' ' ,e.LastName) Nombre_completo,
+    concat(e.City,', ',e.State,', ',e.Country) Direccion,
+    e.Email
+FROM
+	employees as e
+    where title = 'Sales Support Agent';
+    
+-- 6. Obten una lista con los paises no repetidos a los que se han emitido facturas
+Select DISTINCT
+	inv.BillingCountry
+FROM 
+	invoices as inv
+inner join invoice_items as invit on invit.InvoiceId = inv.InvoiceId;
+
+-- 7. Obten una lista con los estados de USA no repetidos de donde son los clientes y cuantos clientes tiene cada uno
+Select
+	state,
+    count(CustomerId) as nClientes
+FROM 
+	customers
+Where country = 'USA'
+GROUP by state
+order by nClientes desc;
+-- 8. Cuantos articulos tiene la factura 37
+SELECT factItems.InvoiceId,
+	count(*) as nArticulos
+from 
+	invoice_items as factItems
+inner join invoices as fact on fact.InvoiceId = factItems.InvoiceId
+	WHERE factItems.InvoiceId = 37;
+    
+-- 9. Obten el conteo de las canciones de AC/DC
+
+SELECT COUNT(t.TrackId) as nCanciones
+FROM tracks AS t
+INNER join albums as al ON t.AlbumId = al.AlbumId
+INNER JOIN artists as ar on al.ArtistId = ar.ArtistId
+WHERE ar.name = 'AC/DC';
+    
+-- 10. Cuantos articulos tiene cada factura
+SELECT 
+	invoiceId, count(invoicelineid)
+From 
+	invoice_items
+GROUP by invoiceId;
+
+-- 11. Cuantas facturas hay de cada país
+
+SELECT 
+	inv.BillingCountry, count(invit.InvoiceLineId)
+From 
+	invoices as inv
+inner join invoice_items as invit on inv.InvoiceId = invit.InvoiceId
+group by inv.BillingCountry;
+ 
+-- 12. Cuántas facturas ha habido en 2009 y 2011
+Select 
+	count(*) as nFacturas2009_2011
+From 	
+	invoices
+    WHERE strftime('%Y', invoicedate) IN ('2009', '2011');
+    
+-- 13. Cuantas facturas ha habido entre 2009 y 2011
+Select 
+	count(*) as nFacturas2009_2011
+From 	
+	invoices
+    WHERE strftime('%Y', invoicedate) 
+    BETWEEN '2009' and '2011';
+    
+-- 14. Cuántas facturas ha habido entre 2009 y 2011
+select
+	country, count(customerid)
+From 
+	customers
+   	Where country in ('Brazil','Spain')
+Group by country;
+
+-- 15. Canciones que su titulo empieza por you
+select
+	Name
+From 
+	tracks
+    where name like 'You%';
+    
+-- 1. Facturas de Clientes de Brasil, Nombre del cliente, Id de factura, fecha de la factura
+-- y el país de la factura
+
+select 
+	concat(c.FirstName, ' ', c.LastName) nombre_completo, inv.InvoiceId as IdFactura,
+    inv.InvoiceDate as fecha_factura, inv.BillingCountry as pais_factura
+From customers as c
+inner join invoices as inv on inv.CustomerId = c.CustomerId
+where c.Country = 'Brazil';
+
+-- 2. Obtén cada factura asociada a cada agente de ventas con su nombre completo
+ 
+select 
+	concat(e.FirstName, ' ', e.LastName) Nombre_completo_agente, i.*
+from employees as e
+inner join customers as c on e.EmployeeId = c.SupportRepId
+inner join invoices as i on i.CustomerId = c.CustomerId
+where e.title = 'Sales Support Agent';
+
+-- 3. Obtén el nombre del cliente, el país, el nombre del agente y eltotal
+ 
+select 
+	concat(c.FirstName, ' ', c.LastName) nombre_completo_cliente, c.Country as pais_cliente,
+    concat(e.FirstName, ' ', e.LastName) Nombre_completo_agent, sum(i.Total)
+from employees as e
+inner join customers as c on e.EmployeeId = c.SupportRepId
+inner join invoices as i on i.CustomerId = c.CustomerId
+where e.title = 'Sales Support Agent'
+GROUP BY nombre_completo_cliente;
